@@ -25,8 +25,9 @@ Normalize zero enum fields only inside an existing event envelope. Root double-t
 uses shutDownPageContainer(1); keep listeners alive if the user cancels. Persist
 validated state with SDK storage. Do not assume phone-lock/background execution.
 
-API authorization and routing must share the same normalized URL. Private remote
-reads require authenticated Tailscale identity AND a paired-device bearer; a null
+API authorization and routing must share the same normalized URL. Tailscale mode requires proxy identity AND a paired-device bearer. Paired HTTPS
+mode requires an explicit HTTPS origin and a device bearer for every API read/write;
+never accept caller-supplied Tailscale headers as authentication in this mode; a null
 origin alone is not authentication. Pair codes are one-use, time/attempt bounded,
 and generated locally. Never log a code, bearer, provider cookie or post content.
 Diagnostics are bounded numeric/boolean metrics. Keep fixture, live-provider,

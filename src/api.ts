@@ -9,7 +9,7 @@ export function feedError(status:number,payload:unknown,retryHeader:string|null)
   bookmark_failed:'X did not save the bookmark. Try again in X.',
   bookmark_unknown:'Bookmark result uncertain. Check X before retrying.',
   post_unavailable:'Refresh this post before bookmarking it.',
-  pairing_required:'Pair this phone using the laptop code in X setup.',
+  pairing_required:'Pair this phone using the server pairing code in X setup.',
   cursor_expired:'Older-page cursor expired. Refresh to continue; your current reading stays pinned.',
   busy:'Another feed request is running. Try again shortly.',
   not_configured:'Live service needs private server setup. No X account is connected.',

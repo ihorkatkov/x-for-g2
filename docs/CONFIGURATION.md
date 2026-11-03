@@ -13,6 +13,7 @@ load `.env`; demo mode uses invented fixtures without loading session credential
 | `REED_ORIGIN` | Exact server origin; overrides `X_SERVICE_ORIGIN` at beta runtime |
 | `REED_TAILSCALE_USER` | Exact Tailscale user login allowed through Serve |
 | `REED_SESSION_ENV` | Optional explicit server-side session file; no unrelated configuration is read automatically |
+| `REED_PAIRED_HTTPS` | Set to `1` for explicit remote HTTPS with paired-device authentication, without Tailscale or a shared access token; requires `REED_REMOTE=1` and exact HTTPS `REED_ORIGIN` |
 | `REED_PAIRING_FILE` | Optional device-session hash file; defaults to `.local/beta-pairing.json` |
 | `REED_HOME_QUERY_ID`, `REED_LATEST_QUERY_ID` | Optional paired public query-ID overrides if discovery changes |
 | `REED_BOOKMARK_QUERY_ID` | Optional public bookmark-add operation ID override; discovered automatically otherwise |
@@ -34,6 +35,9 @@ For another session file, leave the template credential values blank and set
 Changing or expiring the X session does not change the device pairing, but a changed
 X account/session namespace invalidates old reading caches. Restart the backend
 after replacing X credentials; blocked/expired upstream access is latched.
+
+For always-on Linux hosting with device pairing, see [systemd deployment](SYSTEMD.md).
+Do not combine `REED_PAIRED_HTTPS=1` with a Tailscale login or generic access token.
 
 ## Other reverse proxies
 

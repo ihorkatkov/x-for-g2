@@ -1,0 +1,30 @@
+[Unit]
+Description=X for G2 dedicated HTTPS upstream proxy
+After=network.target x-reader.service
+
+[Service]
+Type=simple
+User=x-reader-proxy
+Group=x-reader-proxy
+ExecStartPre=/usr/sbin/nginx -t -c /etc/x-reader-proxy/nginx.conf
+ExecStart=/usr/sbin/nginx -c /etc/x-reader-proxy/nginx.conf -g "daemon off;"
+Restart=always
+RestartSec=5
+StateDirectory=x-reader-proxy
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryMax=64M
+TasksMax=32
+LogsDirectory=x-reader-proxy
+LogsDirectoryMode=0750
+StandardOutput=append:/var/log/x-reader-proxy/service.log
+StandardError=append:/var/log/x-reader-proxy/service.log
+
+[Install]
+WantedBy=multi-user.target

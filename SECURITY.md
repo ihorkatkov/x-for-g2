@@ -33,3 +33,11 @@ served by this backend and the current account scope. Private Tailscale writes
 require both the proxy identity and paired-device bearer. JSON bodies are bounded
 and validated. The server sends only a fixed bookmark-add operation to X;
 uncertain writes are not retried automatically. Demo saves never contact X.
+
+Paired HTTPS mode (`REED_PAIRED_HTTPS=1`) uses the paired-device bearer without a
+Tailscale identity. It requires explicit remote HTTPS configuration and cannot be
+combined with the other remote authentication modes. The backend stays loopback
+only; a dedicated HTTPS reverse proxy forwards requests. CORS preflight and the
+one-use pairing endpoint do not expose account data. All other API reads and
+bookmark writes require a valid device bearer. Never expose a generic upstream
+service token in the package.

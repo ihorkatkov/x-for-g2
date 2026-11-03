@@ -5,7 +5,7 @@
 
 **Read X on your Even Realities G2 glasses, one post at a time.**
 
-X is a self-hosted, unofficial reader for **For You** and **Following**. Your laptop
+X is a self-hosted, unofficial reader for **For You** and **Following**. Your self-hosted backend
 fetches the feed; the phone connects through a private backend and sends readable
 text and still images to the glasses. X session cookies stay on the backend.
 
@@ -24,7 +24,7 @@ text and still images to the glasses. X session cookies stay on the backend.
 - **Skip long posts** directly with Next post / Previous post in the glasses menu.
 - **Bookmark on X** saves the original post to your actual account, with a header confirmation.
 - **Pinned reading**: refreshing queues new arrivals without moving the post you are reading.
-- **Private device pairing** over Tailscale, plus a bounded offline reading cache in the Even host.
+- **Private device pairing** over HTTPS or Tailscale, plus a bounded offline reading cache in the Even host.
 
 This app reads feeds and saves bookmarks only when you choose **Bookmark post**.
 It does not post, like, publish reposts, load comment threads
@@ -88,6 +88,13 @@ npm start
 Keep these values on the backend. Do not commit them, paste them into issues, put
 them in `VITE_*` variables or include them in an `.ehpk`. `.env` is ignored.
 An expired or denied session produces an error; the app cannot bypass X access controls.
+
+## Run it without a laptop
+
+The backend can run continuously on a Linux VM with systemd. Use the
+[Linux deployment guide](docs/SYSTEMD.md) for a dedicated service, protected X
+credentials, persistent phone pairing, HTTPS and restart/recovery checks.
+This mode needs no Tailscale connection on the phone.
 
 ## Use it on glasses
 

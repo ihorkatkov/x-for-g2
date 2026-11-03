@@ -1,0 +1,41 @@
+[Unit]
+Description=X for G2 backend
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=x-reader
+Group=x-reader
+WorkingDirectory=/opt/x-for-g2/current
+EnvironmentFile=/etc/x-reader/service.env
+LoadCredential=x-session:/etc/x-reader/session.env
+ExecStart=/opt/x-for-g2/current/runtime/node --env-file=%d/x-session --import tsx server/main.ts --glasses
+Restart=always
+RestartSec=5
+TimeoutStopSec=20
+StateDirectory=x-reader
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+MemoryMax=384M
+TasksMax=64
+LogsDirectory=x-reader
+LogsDirectoryMode=0750
+StandardOutput=append:/var/log/x-reader/service.log
+StandardError=append:/var/log/x-reader/service.log
+
+[Install]
+WantedBy=multi-user.target

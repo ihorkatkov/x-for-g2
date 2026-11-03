@@ -9,8 +9,8 @@ and [security boundary](../SECURITY.md).
 | `GET /api/feed?feed=for-you\|following[&cursor=...]` | Up to30 normalized posts and an opaque cursor |
 | `GET /api/image/<signed-handle>` | Bounded JPEG/PNG download through the fixed CDN adapter |
 | `POST /api/bookmark` | Explicit add-only save of a recently served original post, bound to the current account scope |
-| `POST /api/pair` | One-use code → runtime device session, in private Tailscale mode only |
-| `OPTIONS /api/...` | Restricted packaged-client preflight in private Tailscale mode |
+| `POST /api/pair` | One-use code → runtime device session, in Tailscale or explicit paired HTTPS mode |
+| `OPTIONS /api/...` | Restricted packaged-client preflight in Tailscale or paired HTTPS mode |
 
 All API reads in private Tailscale mode need the proxy identity and device bearer.
 The pairing POST needs the proxy identity and laptop code. Bookmark writes require the same identity and device authentication as reads.
@@ -38,3 +38,7 @@ method, body, query and path constraints are enforced before provider calls.
 Cursors are feed-bound, opaque, bounded and expire after ten minutes. Feed state
 is capped and cached on the phone separately; this server is not a database or
 multi-user hosted service. Tests inject fabricated responses and ephemeral ports.
+
+For public HTTPS hosting, explicit paired mode requires a valid device bearer on
+every API read/write without trusting any Tailscale header. See
+[Linux/systemd hosting](../docs/SYSTEMD.md).

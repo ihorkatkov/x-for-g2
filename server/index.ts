@@ -27,9 +27,12 @@ function config(env: NodeJS.ProcessEnv) {
   if (!remote && (url.protocol !== 'http:' || url.hostname !== (host === '::1' ? '[::1]' : host) || Number(url.port || 80) !== port)) throw new Error('Local origin must match binding');
   const access = env.REED_ACCESS_TOKEN ?? '';
   const tailnetUser=env.REED_TAILSCALE_USER??'';
+  const publicPairing=env.REED_PAIRED_HTTPS==='1';
+  if(env.REED_PAIRED_HTTPS!==undefined&&!['0','1'].includes(env.REED_PAIRED_HTTPS))throw new Error('Invalid REED_PAIRED_HTTPS');
+  if(publicPairing&&(!remote||url.protocol!=='https:'||tailnetUser||access))throw new Error('Paired HTTPS requires exclusive remote HTTPS authentication');
   if(tailnetUser&&(!remote||tailnetUser.length>200||!/^\S+@[^\s@]+$/.test(tailnetUser)||!url.hostname.endsWith('.ts.net')))throw new Error('Invalid private Tailscale service configuration');
   if(tailnetUser&&access)throw new Error('Choose one remote authentication mode');
-  if (remote && (url.protocol !== 'https:' || !tailnetUser&&!/^[A-Za-z0-9_-]{32,256}$/.test(access))) throw new Error('Remote mode requires HTTPS origin and strong REED_ACCESS_TOKEN');
+  if (remote && (url.protocol !== 'https:' || !tailnetUser&&!publicPairing&&!/^[A-Za-z0-9_-]{32,256}$/.test(access))) throw new Error('Remote mode requires HTTPS origin and strong REED_ACCESS_TOKEN');
   const auth = env.AUTH_TOKEN ?? '', ct0 = env.CT0 ?? '';
   for (const value of [auth, ct0]) if (value && !/^[A-Za-z0-9_%.-]{1,4096}$/.test(value)) throw new Error('Invalid private credential format');
   if (Boolean(auth) !== Boolean(ct0)) throw new Error('Set both AUTH_TOKEN and CT0 or neither');
@@ -40,7 +43,7 @@ function config(env: NodeJS.ProcessEnv) {
   const queryIds = {...(homeId&&latestId?{HomeTimeline:homeId,HomeLatestTimeline:latestId}:{}),...(bookmarkId?{CreateBookmark:bookmarkId}:{})};
   const queryFormat=env.REED_QUERY_FORMAT??'relay';
   if(queryFormat!=='legacy'&&queryFormat!=='relay')throw new Error('Invalid REED_QUERY_FORMAT');
-  return { mode, host, port, origin, authority: url.host, remote, access, tailnetUser, auth, ct0, queryIds, queryFormat, configured: Boolean(auth && ct0) } as const;
+  return { mode, host, port, origin, authority: url.host, remote, access, tailnetUser, publicPairing, auth, ct0, queryIds, queryFormat, configured: Boolean(auth && ct0) } as const;
 }
 function packagedOrigin(origin:string){
  if(origin==='null')return true;
@@ -63,7 +66,8 @@ export function createServer(options: ServerOptions = {}): Server {
   const transport = new TimelineTransport(cfg.auth, cfg.ct0, options.fetcher, now, cfg.queryIds, cfg.queryFormat);
   const cursors = new Map<string, { feed: Feed; upstream: string; until: number }>();
   const demo = new DemoTimeline();
-  const pairing=cfg.tailnetUser?new PairingStore(env.REED_PAIRING_FILE??resolve(appRoot,'.local/beta-pairing.json'),now):null;
+  const paired=Boolean(cfg.tailnetUser||cfg.publicPairing);
+  const pairing=paired?new PairingStore(env.REED_PAIRING_FILE??resolve(appRoot,'.local/beta-pairing.json'),now):null;
   const photos = new Photos(options.fetcher,createHash('sha256').update('x-photo-v1\0').update(cfg.auth).update('\0').update(cfg.ct0).digest());
   const dist = resolve(options.distDir ?? resolve(appRoot, 'dist'));
   const readablePosts=new Map<string,number>(),bookmarked=new Set<string>();
@@ -81,8 +85,8 @@ export function createServer(options: ServerOptions = {}): Server {
     };
     try {
       const origin=req.headers.origin;
-      const originAllowed=origin===undefined||origin===cfg.origin||Boolean(cfg.tailnetUser&&origin!==undefined&&packagedOrigin(origin));
-      if(req.headers.host!==cfg.authority||!originAllowed||req.headers['sec-fetch-site']==='cross-site'&&!cfg.tailnetUser)throw new BackendError('forbidden',403);
+      const originAllowed=origin===undefined||origin===cfg.origin||Boolean(paired&&origin!==undefined&&packagedOrigin(origin));
+      if(req.headers.host!==cfg.authority||!originAllowed||req.headers['sec-fetch-site']==='cross-site'&&!paired)throw new BackendError('forbidden',403);
       // Incidental host-scoped cookies can come from other loopback ports.
       // Ignore them entirely: only private server configuration authenticates X.
       // No request headers are ever forwarded to the X transport.
@@ -92,13 +96,13 @@ export function createServer(options: ServerOptions = {}): Server {
           // Listener stays loopback-only. Tailscale Serve strips caller identity
           // headers, then supplies the authenticated tailnet user over this hop.
           if(!['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress??'')||req.headers['tailscale-user-login']!==cfg.tailnetUser)throw new BackendError('forbidden',403);
-        }else if(!equal(req.headers.authorization??'',`Bearer ${cfg.access}`))throw new BackendError('forbidden',403);
+        }else if(!cfg.publicPairing&&!equal(req.headers.authorization??'',`Bearer ${cfg.access}`))throw new BackendError('forbidden',403);
       }
-      if(!req.url?.startsWith('/')||req.url.startsWith('//')||req.url.length>4096)throw new BackendError('invalid_request',400);
+      if(!req.url?.startsWith('/')||req.url.startsWith('//')||req.url.includes('\\')||req.url.includes('#')||req.url.length>4096)throw new BackendError('invalid_request',400);
       const url=new URL(req.url,cfg.origin);
       if(url.origin!==cfg.origin)throw new BackendError('invalid_request',400);
-      if(cfg.tailnetUser&&origin){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Max-Age','600')}
-      if(cfg.tailnetUser&&req.method==='OPTIONS'){
+      if(paired&&origin){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Max-Age','600')}
+      if(paired&&req.method==='OPTIONS'){
         if(!['GET','POST'].includes(String(req.headers['access-control-request-method']))||String(req.headers['access-control-request-headers']??'').split(',').some(h=>h.trim()&&!/^(?:content-type|authorization)$/i.test(h.trim()))||req.headers['transfer-encoding']||Number(req.headers['content-length']??0)!==0)throw new BackendError('invalid_request',400);
         if(!url.pathname.startsWith('/api/')||req.headers['access-control-request-method']==='POST'&&(!['/api/pair','/api/bookmark'].includes(url.pathname)||url.search))throw new BackendError('invalid_request',400);
         res.writeHead(204);res.end();return;

@@ -1,6 +1,6 @@
 /** CLI adapter only. Importing this module never opens a listener. */
 import { resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { start } from './index.ts';
 export { createServer, start } from './index.ts';
 
@@ -13,7 +13,7 @@ export function localEnvironment(env:NodeJS.ProcessEnv=process.env){
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const env=localEnvironment(process.argv.includes('--demo')?{...process.env,REED_MODE:'demo'}:process.env);
-  start({env}).then(() => console.log('X backend ready (no private values logged).')).catch(() => {
+  start({env,...(process.argv.includes('--glasses')?{distDir:fileURLToPath(new URL('../dist-glasses/',import.meta.url))}:{})}).then(() => console.log('X backend ready (no private values logged).')).catch(() => {
     console.error('X backend startup failed. Check private configuration.');
     process.exitCode = 1;
   });

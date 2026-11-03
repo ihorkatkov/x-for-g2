@@ -11,7 +11,7 @@ import {Gallery,loadPhoto,blankTile,attachmentOnly,AttachmentSession} from './ph
 import {markBytes} from './mark.ts'
 import {SerialHost,LatestRender,pageCounter,headerText,bookmarkHeader,display,geometry,menuItems,type Display} from './host.ts'
 
-const diagnostics=new Diagnostics('reed-g2','0.3.3','0.0.16',200)
+const diagnostics=new Diagnostics('reed-g2','0.3.4','0.0.16',200)
 diagnostics.record('session.start')
 const el=<T extends HTMLElement=HTMLElement>(id:string)=>{const node=document.getElementById(id);if(!node)throw Error('Missing UI element');return node as T}
 const queue=new SerialHost()
@@ -203,12 +203,12 @@ for(const [id,action] of Object.entries({forYou:'for-you',following:'following',
 el('pairForm').addEventListener('submit',event=>{event.preventDefault();if(pairBusy)return;pairBusy=true;renderPhone();void(async()=>{
  try{
   const input=el<HTMLInputElement>('pairCode'),response=await fetch(serviceURL('/api/pair'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:input.value.trim()}),signal:AbortSignal.timeout(15000),credentials:'omit'})
-  if(!response.ok)throw Error('Code invalid, expired or locked. Generate a new laptop code.')
+  if(!response.ok)throw Error('Code invalid, expired or locked. Generate a new server pairing code.')
   const result=await jsonResponse(response,2000) as {token?:unknown};acceptClientAuth(result.token);input.value=''
   if(bridge){if(!await queue.run(()=>bridge!.setLocalStorage('x.device.v1',serializedClientAuth())))throw Error('Could not save pairing on this phone. Try again.')}
   else try{sessionStorage.setItem('x.device.v1',serializedClientAuth())}catch{/* This browser stays paired only until reload. */}
   await checkStatus();if(!needsPairing)await reader.refresh();el('pairStatus').textContent='Connected.'
- }catch(error){el('pairStatus').textContent=error instanceof Error?error.message:'Pairing unavailable. Check the laptop.'}finally{pairBusy=false;render()}
+ }catch(error){el('pairStatus').textContent=error instanceof Error?error.message:'Pairing unavailable. Check the server.'}finally{pairBusy=false;render()}
 })()})
 el('export').addEventListener('click',()=>{
  const blob=new Blob([JSON.stringify(diagnostics.export(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='x-diagnostics.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)
@@ -233,7 +233,7 @@ window.addEventListener('offline',()=>{backendWarning='Offline. Cached posts rem
 
 async function checkStatus(){
  try{
-  const res=await fetch(serviceURL('/api/status'),{headers:authHeaders(),signal:AbortSignal.timeout(5000),cache:'no-store'});if(res.status===401){const payload=await jsonResponse(res,2000) as {error?:unknown};if(payload.error==='pairing_required'){needsPairing=true;configured=false;backendWarning='Enter the laptop code to connect this phone.';renderPhone();return}}if(!res.ok)throw Error('Unavailable')
+  const res=await fetch(serviceURL('/api/status'),{headers:authHeaders(),signal:AbortSignal.timeout(5000),cache:'no-store'});if(res.status===401){const payload=await jsonResponse(res,2000) as {error?:unknown};if(payload.error==='pairing_required'){needsPairing=true;configured=false;backendWarning='Enter the server pairing code to connect this phone.';renderPhone();return}}if(!res.ok)throw Error('Unavailable')
   const status=await jsonResponse(res,2000) as {mode?:unknown;configured?:unknown;scope?:unknown}
   if(status.mode!=='demo'&&status.mode!=='live'||!validScope(status.scope))throw Error('Invalid status')
   needsPairing=false;mode=status.mode;configured=status.configured===true;sessionScope=status.scope

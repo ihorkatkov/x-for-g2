@@ -1,6 +1,6 @@
 import {loadEnv} from 'vite'
 export function validateServiceOrigin(value:unknown):string {
- if(typeof value!=='string'||!value)throw Error('Set X_SERVICE_ORIGIN to your own Tailscale HTTPS origin before building for glasses.')
+ if(typeof value!=='string'||!value)throw Error('Set X_SERVICE_ORIGIN to your own HTTPS service origin before building for glasses.')
  let u:URL;try{u=new URL(value)}catch{throw Error('Invalid X_SERVICE_ORIGIN.')}
  if(u.protocol!=='https:'||u.origin!==value||u.username||u.password)throw Error('X_SERVICE_ORIGIN must be an exact HTTPS origin without credentials or a path.')
  return u.origin
