@@ -2,6 +2,9 @@
  * same-origin API calls. X credentials never enter this module; device sessions
  * are acquired through one-time pairing and restored from the host. */
 export function resolveServiceURL(path:string,base=''){
+ // The invented local demo has one bundled photo; packaged live clients must
+ // continue to use authenticated API image handles only.
+ if(!base&&path==='/demo-earthrise.jpg')return path
  if(!path.startsWith('/api/')||path.startsWith('//'))throw Error('Invalid service path')
  const origin=base||'https://local.invalid'
  const root=new URL(origin)

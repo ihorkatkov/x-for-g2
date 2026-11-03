@@ -7,6 +7,13 @@ import {glassesOrigin,validateServiceOrigin} from '../config/glasses.ts'
 import {privateBeta,betaEnvironment} from '../server/private-beta.ts'
 import {localEnvironment} from '../server/main.ts'
 import {createServer} from '../server/index.ts'
+import {resolveServiceURL} from '../src/service.ts'
+test('bundled demo photo is local-only while packaged images require API handles',()=>{
+ assert.equal(resolveServiceURL('/demo-earthrise.jpg'),'/demo-earthrise.jpg');
+ assert.throws(()=>resolveServiceURL('/demo-earthrise.jpg','https://reader.example'));
+ for(const path of ['/other.jpg','//remote.example/demo-earthrise.jpg','/demo-earthrise.jpg?private=1'])assert.throws(()=>resolveServiceURL(path));
+ assert.equal(resolveServiceURL('/api/image/signed-handle','https://reader.example'),'https://reader.example/api/image/signed-handle');
+})
 test('shared beta settings do not break local startup or weaken explicit remote authentication',()=>{
  const env={REED_MODE:'demo',X_SERVICE_ORIGIN:'https://reader.example.ts.net:8449',REED_TAILSCALE_USER:'reader@example.test'};
  assert.doesNotThrow(()=>createServer({env:localEnvironment(env)}));
