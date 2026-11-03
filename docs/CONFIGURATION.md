@@ -8,7 +8,7 @@ load `.env`; demo mode uses invented fixtures without loading session credential
 | `AUTH_TOKEN`, `CT0` | Authorized X session pair, backend only |
 | `REED_MODE` | `live` by default; `demo` selects fixtures explicitly |
 | `REED_HOST` | Loopback listener only, default `127.0.0.1` |
-| `REED_PORT` | Local listener, default4040; beta launcher defaults4043 |
+| `REED_PORT` | Local listener, default 4040; beta launcher defaults 4043 |
 | `X_SERVICE_ORIGIN` | Public HTTPS origin used by the glasses build and beta launcher |
 | `REED_ORIGIN` | Exact server origin; overrides `X_SERVICE_ORIGIN` at beta runtime |
 | `REED_TAILSCALE_USER` | Exact Tailscale user login allowed through Serve |

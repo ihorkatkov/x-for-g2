@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import {mkdirSync,writeFileSync} from 'node:fs'
+import {mkdirSync,writeFileSync,readFileSync} from 'node:fs'
 import {PNG} from 'pngjs'
 const api=process.env.X_SIM_URL??'http://127.0.0.1:9902',out=new URL('../artifacts/repost-reading/',import.meta.url);mkdirSync(out,{recursive:true})
 assert.equal((await fetch((process.env.X_READER_URL??'http://127.0.0.1:4040')+'/api/status').then(r=>r.json())).mode,'demo')
@@ -10,4 +10,4 @@ async function shot(name){await sleep(300);const bytes=Buffer.from(await fetch(a
 for(let i=0;i<80;i++){const s=await state();if(s?.demo&&s.count>=5&&s.index===s.count-1&&!s.busy)break;await input('down')}
 const first=await state();assert.ok(first.count>=5&&first.index===first.count-1&&!first.hasCursor);assert.equal(first.page,0);await shot('01-reposted-original')
 await input('down');const second=await state();assert.equal(second.index,first.index);assert.equal(second.page,1);await shot('02-reposted-original-next-page')
-const report={app:'0.2.0',sdk:'0.0.16',simulator:'0.9.5',testedAt:new Date().toISOString(),checks:['Actual native navigation loads older sample containing a repost','Original author Nia Moss and text are retained; reposter shown separately via @sam_demo','Second page retains attribution and continues original text'],readingOnly:true,limits:['Invented fixture, no live account or physical G2 proof']};writeFileSync(new URL('simulator-report.json',out),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2))
+const report={app:'X',version:JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8')).version,sdk:'0.0.16',simulator:'0.9.5',testedAt:new Date().toISOString(),checks:['Actual native navigation loads older sample containing a repost','Original author Nia Moss and text are retained; reposter shown separately via @sam_demo','Second page retains attribution and continues original text'],readingOnly:true,limits:['Invented fixture, no live account or physical G2 proof']};writeFileSync(new URL('simulator-report.json',out),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2))
