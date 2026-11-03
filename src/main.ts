@@ -11,7 +11,7 @@ import {Gallery,loadPhoto,blankTile,attachmentOnly,AttachmentSession} from './ph
 import {markBytes} from './mark.ts'
 import {SerialHost,LatestRender,pageCounter,headerText,bookmarkHeader,display,geometry,menuItems,type Display} from './host.ts'
 
-const diagnostics=new Diagnostics('reed-g2','0.3.2','0.0.16',200)
+const diagnostics=new Diagnostics('reed-g2','0.3.3','0.0.16',200)
 diagnostics.record('session.start')
 const el=<T extends HTMLElement=HTMLElement>(id:string)=>{const node=document.getElementById(id);if(!node)throw Error('Missing UI element');return node as T}
 const queue=new SerialHost()

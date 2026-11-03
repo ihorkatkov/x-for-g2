@@ -41,6 +41,15 @@ test('cache retains current post under budget and never persists cursor across b
   const saved=snapshot('for-you',{'for-you':s,following:freshState()});assert.ok(saved.length<=180000)
   const got=restore(saved,'live')!.feeds['for-you'];assert.equal(currentPost(got)?.id,'18');assert.equal(got.cursor,null)
 })
+test('long press bookmarks once on press, release is inert and menu/exit keep priority',()=>{
+ assert.equal(eventAction({sysEvent:{eventType:9}}),'bookmark')
+ assert.equal(eventAction({textEvent:{eventType:9}}),'bookmark')
+ assert.equal(eventAction({sysEvent:{eventType:10}}),null)
+ assert.equal(eventAction({sysEvent:{eventType:10},textEvent:{}}),null)
+ assert.equal(eventAction({textEvent:{eventType:10},sysEvent:{}}),null)
+ assert.equal(eventAction({sysEvent:{eventType:9},menuItemClickEvent:{itemID:1}}),'refresh')
+ assert.equal(eventAction({sysEvent:{eventType:9},textEvent:{eventType:3}}),'exit')
+})
 test('zero defaults only in present envelope, menu independent and exit prioritized',()=>{
   assert.equal(eventAction({audioEvent:{}}),null)
   assert.equal(eventAction({sysEvent:{}}),'next')

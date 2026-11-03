@@ -123,6 +123,9 @@ export function eventAction(event:{sysEvent?:{eventType?:number};textEvent?:{eve
   if(sys===3||txt===3)return 'exit'
   const menu:Record<number,Action>={1:'refresh',2:'for-you',3:'following',4:'newest',5:'more',6:'image',7:'text',8:'next-post',9:'previous-post',10:'bookmark'}
   if(event.menuItemClickEvent)return menu[event.menuItemClickEvent.itemID??0]??null
+  // Bookmark on press only; release must not fall through to a page click.
+  if(sys===10||txt===10)return null
+  if(sys===9||txt===9)return 'bookmark'
   if(txt===1)return 'previous'
   if(txt===2||sys===0||txt===0)return 'next'
   return sys===4?'resume':sys===5?'persist':null

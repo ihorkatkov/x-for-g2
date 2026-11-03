@@ -169,6 +169,7 @@ separate from your X session: provider cookies never go to the phone. See
 | Tap then hold | System menu: refresh, switch feed, images, Next post, Previous post, Bookmark post |
 | Menu → Next post / Previous post | Skip all remaining pages; enter the adjacent post at page 1 |
 | Menu → Bookmark post | Add the current original post to your X bookmarks |
+| Long press | Bookmark the current post; release does not turn the page |
 | Double-tap in an image | Return to the same text page |
 | Double-tap in text | Request the system exit dialog |
 | Last/first boundary in an automatic image view | Return to the caption and descriptions before continuing |

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f6f1"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><title>X — a quieter timeline</title></head>
 <body><main>
-<div class="build-status"><span>X 0.3.2 · SDK 0.0.16</span><span id="mode">Checking server</span></div>
+<div class="build-status"><span>X 0.3.3 · SDK 0.0.16</span><span id="mode">Checking server</span></div>
 <header class="app-header"><a class="brand" href="/" aria-label="X home"><img class="brand-mark" src="/favicon.svg" alt=""> <span> / g2</span></a><div class="connection" id="connection" role="status">Phone preview · waiting for glasses bridge</div></header>
 <div class="workspace"><section aria-label="Reader">
 <nav class="steps" aria-label="Choose timeline"><button id="forYou" aria-pressed="true">01 <b>For You</b></button><button id="following" aria-pressed="false">02 <b>Following</b></button></nav>
@@ -14,7 +14,7 @@
 <button id="more" class="quiet" hidden>Load more original posts</button>
 </section><aside class="glasses-panel"><div class="panel-heading"><h2>On your glasses</h2><span id="cacheLabel">No cache</span></div>
 <div class="lens" aria-label="Illustrative glasses preview"><div id="lensHeader"></div><div id="lensAuthor"></div><pre id="lensBody"></pre><canvas id="lensPhoto" width="536" height="144" hidden></canvas><div id="lensPager"></div></div>
-<p class="small">Swipe down or tap to move forward. Swipe up to go back. Long posts continue across measured pages.</p><div class="gesture-guide"><div><span>Tap then hold</span><b>Feeds, skip, images & bookmarks</b></div><div><span>Double-tap</span><b>Back from image / system exit</b></div></div>
+<p class="small">Swipe down or tap to move forward. Swipe up to go back. Long posts continue across measured pages.</p><div class="gesture-guide"><div><span>Long press</span><b>Bookmark current post</b></div><div><span>Tap then hold</span><b>Feeds, skip, images & bookmarks</b></div><div><span>Double-tap</span><b>Back from image / system exit</b></div></div>
 <details class="setup"><summary>Connection & setup</summary><p id="setupStatus">The backend runs on this page’s origin. No X cookies belong in this browser.</p><p>Live mode: set <code>AUTH_TOKEN</code> and <code>CT0</code> in the server’s private <code>.env</code>, only after consenting to use your session. See README. X cannot bypass blocked or expired access.</p><p>Demo: run <code>npm run demo</code>. Fixture posts are invented examples, not your timeline. Live errors never fall back to demo.</p><p>Loopback works on this computer only. Phone access requires an explicitly protected HTTPS origin, backend configuration and matching app manifest.</p></details>
 </aside></div>
 <footer><details class="data-details"><summary>Privacy & diagnostics</summary><p>Reading and explicit bookmark saves only. X credentials stay on the server. Feed text and reading position are cached locally in the Even host (bounded to 180k characters); no post text or handles are included in diagnostics. Clearing the cache removes the reader’s host copy, not the server session.</p><div class="controls"><button id="export">Export diagnostics</button><button id="clearCache">Clear reading cache</button></div></details><p class="footer-note">X / Text reader for G2</p></footer>
