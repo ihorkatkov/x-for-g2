@@ -1,0 +1,7 @@
+import {PNG} from 'pngjs'
+import {writeFileSync} from 'node:fs'
+const outer=[[18.901,1.153],[22.581,1.153],[14.541,10.343],[24,22.846],[16.594,22.846],[10.794,15.262],[4.154,22.846],[.472,22.846],[9.072,13.011],[0,1.154],[7.594,1.154],[12.837,8.086]],inner=[[17.61,20.644],[19.649,20.644],[6.486,3.24],[4.298,3.24]]
+function inside(x,y,p){let v=false;for(let i=0,j=p.length-1;i<p.length;j=i++){const a=p[i],b=p[j];if((a[1]>y)!=(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])v=!v}return v}
+const p=new PNG({width:28,height:28});for(let y=0;y<28;y++)for(let x=0;x<28;x++){let n=0;for(let j=0;j<4;j++)for(let i=0;i<4;i++){const a=(x+(i+.5)/4-2),b=y+(j+.5)/4-2;if(inside(a,b,outer)!==inside(a,b,inner))n++}const k=(y*28+x)*4;p.data[k]=p.data[k+1]=p.data[k+2]=255;p.data[k+3]=Math.round(n/16*255)}
+const publicBytes=PNG.sync.write(p);for(let i=0;i<p.data.length;i+=4){const v=p.data[i+3];p.data[i]=p.data[i+1]=p.data[i+2]=v;p.data[i+3]=255}const bytes=PNG.sync.write(p);writeFileSync(new URL('../public/x-mark.png',import.meta.url),publicBytes);writeFileSync(new URL('../src/mark.ts',import.meta.url),`// Cached X mark, rasterized by scripts/generate-mark.mjs.\nexport const markBytes=Uint8Array.from(atob('${bytes.toString('base64')}'),c=>c.charCodeAt(0))\n`)
+writeFileSync(new URL('../public/favicon.svg',import.meta.url),'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.64 7.584H.472l8.6-9.835L0 1.154h7.594l5.243 6.932zM17.61 20.644h2.039L6.486 3.24H4.298z"/></svg>')

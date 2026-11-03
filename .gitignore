@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist-glasses/
+.env
+.env.*
+!.env.example
+.local/
+artifacts/
+*.ehpk
+app.glasses.json
+*.log
+.DS_Store

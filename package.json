@@ -1,0 +1,47 @@
+{
+  "name": "x-for-g2",
+  "version": "0.3.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "start": "node --env-file-if-exists=.env --import tsx server/main.ts",
+    "demo": "node --import tsx server/main.ts --demo",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "simulate": "evenhub-simulator 'http://127.0.0.1:4040/' --automation-port 9902",
+    "test:simulator": "node scripts/simulator-test.mjs",
+    "build:glasses": "tsc --noEmit && vite build --mode glasses && node --import tsx scripts/glasses-manifest.ts",
+    "beta:server": "node --env-file-if-exists=.env --import tsx server/private-beta.ts",
+    "beta:pair": "node --env-file-if-exists=.env --import tsx scripts/pair-device.ts",
+    "pack": "evenhub pack app.glasses.json dist-glasses -o x.ehpk --sdk-ver 0.0.16",
+    "test:images": "node scripts/simulator-images.mjs"
+  },
+  "dependencies": {
+    "@evenrealities/even_hub_sdk": "0.0.16",
+    "@evenrealities/pretext": "0.1.4"
+  },
+  "devDependencies": {
+    "@evenrealities/evenhub-simulator": "0.9.5",
+    "@types/node": "24.10.1",
+    "pngjs": "7.0.0",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "@evenrealities/evenhub-cli": "0.2.0"
+  },
+  "description": "A self-hosted X timeline reader for Even Realities G2 glasses.",
+  "license": "MIT",
+  "author": "Ihor Katkov",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ihorkatkov/x-for-g2.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ihorkatkov/x-for-g2/issues"
+  },
+  "homepage": "https://github.com/ihorkatkov/x-for-g2#readme"
+}

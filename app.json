@@ -1,0 +1,20 @@
+{
+  "package_id": "com.ihorkatkov.reedg2",
+  "edition": "202601",
+  "name": "X",
+  "version": "0.3.1",
+  "min_sdk_version": "0.0.16",
+  "entrypoint": "index.html",
+  "permissions": [
+    {
+      "name": "network",
+      "desc": "Reads timelines and still previews from your own backend. No posting or sensors.",
+      "whitelist": [
+        "http://127.0.0.1:4040"
+      ]
+    }
+  ],
+  "supported_languages": [
+    "en"
+  ]
+}

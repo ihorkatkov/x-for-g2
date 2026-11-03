@@ -1,0 +1,361 @@
+{
+  "schema": "reed.demo.v1",
+  "pages": [
+    {
+      "data": {
+        "home": {
+          "home_timeline_urt": {
+            "instructions": [
+              {
+                "entries": [
+                  {
+                    "content": {
+                      "itemContent": {
+                        "tweet_results": {
+                          "result": {
+                            "rest_id": "1001",
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "legacy": {
+                                    "name": "Mira Lane",
+                                    "screen_name": "mira_demo"
+                                  }
+                                }
+                              }
+                            },
+                            "legacy": {
+                              "full_text": "DEMO / Invented sample post.\n\nA good reading interface knows when to get out of the way. One thought, enough room to breathe, and a clear place to continue.",
+                              "created_at": "2026-11-03T12:00:00Z",
+                              "extended_entities": {
+                                "media": [
+                                  {
+                                    "type": "photo",
+                                    "media_url_https": "https://pbs.twimg.com/media/demo.jpg",
+                                    "ext_alt_text": "NASA Earthrise photograph: a small Earth above the grey lunar horizon against black space. Apollo 8, December 1968."
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "content": {
+                      "itemContent": {
+                        "tweet_results": {
+                          "result": {
+                            "rest_id": "1002",
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "legacy": {
+                                    "name": "Theo Park",
+                                    "screen_name": "theo_demo"
+                                  }
+                                }
+                              }
+                            },
+                            "legacy": {
+                              "full_text": "Legacy preview",
+                              "created_at": "2026-11-03T12:30:00Z"
+                            },
+                            "note_tweet": {
+                              "note_tweet_results": {
+                                "result": {
+                                  "text": "DEMO / A longer field note\n\nThe morning train was unusually quiet. Most screens were dark. Someone was reading a paperback with a folded receipt for a bookmark.\n\nIt reminded me that reading is not the same thing as keeping up. A timeline can be an endless corridor, or it can be a stack of small letters. The difference is whether you get to finish one before the next asks for your attention.\n\nFor this little reader, each post keeps its own place. Long thoughts continue on another measured page. Refresh brings in a new stack without taking the letter out of your hands.\n\nThere are no videos here, no reply threads, no numbers asking you to react. Just original words, a way forward, and a way back.\n\nEnd of the sample long post. Try swiping up to return to the previous page."
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "content": {
+                      "itemContent": {
+                        "tweet_results": {
+                          "result": {
+                            "rest_id": "1003",
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "legacy": {
+                                    "name": "Jules North",
+                                    "screen_name": "jules_demo"
+                                  }
+                                }
+                              }
+                            },
+                            "legacy": {
+                              "full_text": "DEMO / A quote is part of the thought, not a reason to open another screen.",
+                              "created_at": "2026-11-03T10:00:00Z"
+                            },
+                            "quoted_status_result": {
+                              "result": {
+                                "rest_id": "9001",
+                                "core": {
+                                  "user_results": {
+                                    "result": {
+                                      "legacy": {
+                                        "name": "Ari West",
+                                        "screen_name": "ari_demo"
+                                      }
+                                    }
+                                  }
+                                },
+                                "legacy": {
+                                  "full_text": "DEMO / Good tools respect the shape of your attention.\n\nKeep the small things small.",
+                                  "created_at": "2026-11-03T09:00:00Z"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "data": {
+        "home": {
+          "home_timeline_urt": {
+            "instructions": [
+              {
+                "entries": [
+                  {
+                    "content": {
+                      "itemContent": {
+                        "tweet_results": {
+                          "result": {
+                            "rest_id": "1004",
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "legacy": {
+                                    "name": "Robin Vale",
+                                    "screen_name": "robin_demo"
+                                  }
+                                }
+                              }
+                            },
+                            "legacy": {
+                              "full_text": "DEMO / You reached the older fixture page. Cursor pagination brought this post in; it did not replace the post you were reading.",
+                              "created_at": "2026-11-03T08:00:00Z"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "content": {
+                      "itemContent": {
+                        "tweet_results": {
+                          "result": {
+                            "rest_id": "1005",
+                            "core": {
+                              "user_results": {
+                                "result": {
+                                  "legacy": {
+                                    "name": "Sam Reed",
+                                    "screen_name": "sam_demo"
+                                  }
+                                }
+                              }
+                            },
+                            "legacy": {
+                              "full_text": "RT preview",
+                              "created_at": "2026-11-03T07:00:00Z",
+                              "retweeted_status_result": {
+                                "result": {
+                                  "rest_id": "9002",
+                                  "core": {
+                                    "user_results": {
+                                      "result": {
+                                        "legacy": {
+                                          "name": "Nia Moss",
+                                          "screen_name": "nia_demo"
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "legacy": {
+                                    "full_text": "DEMO / A note from the canal path\n\nLeave something unfinished for a walk. Sometimes the next useful thought arrives after you stop pushing for it.\n\nThe canal was quiet this morning. A heron waited beside the bridge, perfectly still while everyone hurried past. I stayed for a minute, then put my notebook away.\n\nOn the way home, the sentence I had been trying to finish finally arrived. It was shorter than the version on my desk. Most of the work was deciding what to leave out.\n\nA small experiment for tomorrow: take the same walk, bring the same question, and leave the phone in a pocket. There is room for a thought to change shape before it becomes a plan.",
+                                    "created_at": "2026-11-03T07:00:00Z"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "refresh": {
+    "data": {
+      "home": {
+        "home_timeline_urt": {
+          "instructions": [
+            {
+              "entries": [
+                {
+                  "content": {
+                    "itemContent": {
+                      "tweet_results": {
+                        "result": {
+                          "rest_id": "1006",
+                          "core": {
+                            "user_results": {
+                              "result": {
+                                "legacy": {
+                                  "name": "Mira Lane",
+                                  "screen_name": "mira_demo"
+                                }
+                              }
+                            }
+                          },
+                          "legacy": {
+                            "full_text": "DEMO / A new arrival, revealed by refresh.\n\nYour previous post is still pinned. Choose Jump to newest when you are ready.",
+                            "created_at": "2026-11-03T13:00:00Z"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "content": {
+                    "itemContent": {
+                      "tweet_results": {
+                        "result": {
+                          "rest_id": "1001",
+                          "core": {
+                            "user_results": {
+                              "result": {
+                                "legacy": {
+                                  "name": "Mira Lane",
+                                  "screen_name": "mira_demo"
+                                }
+                              }
+                            }
+                          },
+                          "legacy": {
+                            "full_text": "DEMO / Invented sample post.\n\nA good reading interface knows when to get out of the way. One thought, enough room to breathe, and a clear place to continue.",
+                            "created_at": "2026-11-03T12:00:00Z",
+                            "extended_entities": {
+                              "media": [
+                                {
+                                  "type": "photo",
+                                  "media_url_https": "https://pbs.twimg.com/media/demo.jpg",
+                                  "ext_alt_text": "NASA Earthrise photograph: a small Earth above the grey lunar horizon against black space. Apollo 8, December 1968."
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "content": {
+                    "itemContent": {
+                      "tweet_results": {
+                        "result": {
+                          "rest_id": "1002",
+                          "core": {
+                            "user_results": {
+                              "result": {
+                                "legacy": {
+                                  "name": "Theo Park",
+                                  "screen_name": "theo_demo"
+                                }
+                              }
+                            }
+                          },
+                          "legacy": {
+                            "full_text": "Legacy preview",
+                            "created_at": "2026-11-03T12:30:00Z"
+                          },
+                          "note_tweet": {
+                            "note_tweet_results": {
+                              "result": {
+                                "text": "DEMO / A longer field note\n\nThe morning train was unusually quiet. Most screens were dark. Someone was reading a paperback with a folded receipt for a bookmark.\n\nIt reminded me that reading is not the same thing as keeping up. A timeline can be an endless corridor, or it can be a stack of small letters. The difference is whether you get to finish one before the next asks for your attention.\n\nFor this little reader, each post keeps its own place. Long thoughts continue on another measured page. Refresh brings in a new stack without taking the letter out of your hands.\n\nThere are no videos here, no reply threads, no numbers asking you to react. Just original words, a way forward, and a way back.\n\nEnd of the sample long post. Try swiping up to return to the previous page."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "content": {
+                    "itemContent": {
+                      "tweet_results": {
+                        "result": {
+                          "rest_id": "1003",
+                          "core": {
+                            "user_results": {
+                              "result": {
+                                "legacy": {
+                                  "name": "Jules North",
+                                  "screen_name": "jules_demo"
+                                }
+                              }
+                            }
+                          },
+                          "legacy": {
+                            "full_text": "DEMO / A quote is part of the thought, not a reason to open another screen.",
+                            "created_at": "2026-11-03T10:00:00Z"
+                          },
+                          "quoted_status_result": {
+                            "result": {
+                              "rest_id": "9001",
+                              "core": {
+                                "user_results": {
+                                  "result": {
+                                    "legacy": {
+                                      "name": "Ari West",
+                                      "screen_name": "ari_demo"
+                                    }
+                                  }
+                                }
+                              },
+                              "legacy": {
+                                "full_text": "DEMO / Good tools respect the shape of your attention.\n\nKeep the small things small.",
+                                "created_at": "2026-11-03T09:00:00Z"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

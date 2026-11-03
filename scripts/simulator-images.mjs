@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict'
+import {mkdirSync,writeFileSync} from 'node:fs'
+import {PNG} from 'pngjs'
+const api=process.env.X_SIM_URL??'http://127.0.0.1:9902',out=new URL('../artifacts/images/',import.meta.url);mkdirSync(out,{recursive:true})
+const sleep=ms=>new Promise(r=>setTimeout(r,ms)),logs=async()=>(await fetch(api+'/api/console').then(r=>r.json())).entries
+const state=async()=>(await logs()).filter(e=>e.message.startsWith('REED_STATE ')).map(e=>JSON.parse(e.message.slice(11))).at(-1)
+async function input(action){assert.ok((await fetch(api+'/api/input',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action})})).ok);await sleep(350)}
+async function wait(predicate){for(let i=0;i<100;i++){const s=await state();if(s&&predicate(s))return s;await sleep(100)}throw Error('State timeout: '+JSON.stringify(await state()))}
+async function menu(index){await input('context_menu');for(let i=0;i<index;i++)await input('down');await input('click')}
+async function shot(name){await sleep(350);const raw=Buffer.from(await fetch(api+'/api/screenshot/glasses').then(r=>r.arrayBuffer()));writeFileSync(new URL(name+'.rgba.png',out),raw);const p=PNG.sync.read(raw);for(let y=280;y<288;y++)for(let x=0;x<576;x++)assert.equal(p.data[(y*576+x)*4+3],0,'Footer must remain empty');for(let i=0;i<p.data.length;i+=4){const a=p.data[i+3]/255;for(let j=0;j<3;j++)p.data[i+j]*=a;p.data[i+3]=255}writeFileSync(new URL(name+'.png',out),PNG.sync.write(p));return p}
+await wait(s=>s.demo&&s.count>=3&&!s.busy);await menu(3);let pinned=await wait(s=>s.index===0&&s.page===0&&!s.imageOpen);if(pinned.count>3){await input('click');pinned=await wait(s=>s.index===1&&s.page===0)}const text=await shot('01-text-header')
+await menu(5);await wait(s=>s.imageOpen&&!s.imageLoading&&s.imagePages===6);await shot('02-image-overview')
+await input('down');await input('down');await input('down');await wait(s=>s.imagePage===3);const detail=await shot('03-image-detail')
+let changed=0;for(let y=76;y<220;y++)for(let x=20;x<556;x++){const i=(y*576+x)*4;if(detail.data[i+1]!==text.data[i+1])changed++}assert.ok(changed>1000,'Actual photo pixels must differ from text')
+await input('double_click');const returned=await wait(s=>!s.imageOpen);assert.equal(returned.index,pinned.index);assert.equal(returned.page,pinned.page);const restored=await shot('04-back-to-text');assert.ok(restored.data.equals(text.data),'Return must clear every photo pixel and restore exactly the same text')
+const timings=(await logs()).filter(e=>e.message.startsWith('X_IMAGE ')).map(e=>JSON.parse(e.message.slice(8)));assert.ok(timings.some(t=>t.visible&&t.tiles===2));assert.ok(timings.some(t=>!t.visible&&t.tiles===2))
+writeFileSync(new URL('phone.png',out),Buffer.from(await fetch(api+'/api/screenshot/webview').then(r=>r.arrayBuffer())))
+const report={app:'X',version:'0.2.0',sdk:'0.0.16',simulator:'0.9.5',testedAt:new Date().toISOString(),checks:['Native X mark upper left and page counter upper right','Bottom eight pixels contain no lit pixels','Native menu opens real sample still photo','Overview plus full-width detail strips navigate with native gestures','Two serialized 268x144 PNG image tiles; scalar host timings recorded','Double-tap clears image tiles and restores byte-identical text framebuffer and reading position'],photoPixelsChanged:changed,hostAcceptanceTimings:timings,limits:['Invented sample timeline with NASA Earthrise photo','Simulator acceptance timing is not BLE or physical display timing','No authenticated X account, installed beta or phone-lock test']};writeFileSync(new URL('simulator-report.json',out),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2))
