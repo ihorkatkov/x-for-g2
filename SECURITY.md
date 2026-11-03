@@ -27,3 +27,9 @@ Keep the backend computer and phone trusted. SDK reading caches contain feed tex
 and are not encrypted application storage. `.env` is ignored, not a security
 boundary by itself: never bundle its secrets. This is a self-hosted beta, not a
 multi-tenant authentication service.
+
+Bookmark addition is an explicit account write, available only for a post recently
+served by this backend and the current account scope. Private Tailscale writes
+require both the proxy identity and paired-device bearer. JSON bodies are bounded
+and validated. The server sends only a fixed bookmark-add operation to X;
+uncertain writes are not retried automatically. Demo saves never contact X.

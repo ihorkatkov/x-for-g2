@@ -15,6 +15,7 @@ load `.env`; demo mode uses invented fixtures without loading session credential
 | `REED_SESSION_ENV` | Optional explicit server-side session file; no unrelated configuration is read automatically |
 | `REED_PAIRING_FILE` | Optional device-session hash file; defaults to `.local/beta-pairing.json` |
 | `REED_HOME_QUERY_ID`, `REED_LATEST_QUERY_ID` | Optional paired public query-ID overrides if discovery changes |
+| `REED_BOOKMARK_QUERY_ID` | Optional public bookmark-add operation ID override; discovered automatically otherwise |
 | `REED_QUERY_FORMAT` | `relay` by default; `legacy` for old query overrides |
 
 Keep `X_SERVICE_ORIGIN` in the shared `.env` so the glasses build and beta backend

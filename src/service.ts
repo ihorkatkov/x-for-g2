@@ -10,7 +10,7 @@ export function resolveServiceURL(path:string,base=''){
  const root=new URL(origin)
  if(base&&(root.protocol!=='https:'||root.origin!==base||root.username||root.password))throw Error('Invalid service origin')
  const url=new URL(path,origin)
- if(url.origin!==root.origin||!/^\/api\/(?:status|feed|pair|image\/[A-Za-z0-9_.-]+)$/.test(url.pathname))throw Error('Invalid service path')
+ if(url.origin!==root.origin||!/^\/api\/(?:status|feed|pair|bookmark|image\/[A-Za-z0-9_.-]+)$/.test(url.pathname))throw Error('Invalid service path')
  return base?url.href:path
 }
 function serviceOrigin(){return typeof document==='undefined'?'':(document.getElementById('service-endpoint') as HTMLMetaElement|null)?.content??''}

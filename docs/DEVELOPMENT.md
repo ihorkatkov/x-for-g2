@@ -48,6 +48,15 @@ X_READER_URL=http://127.0.0.1:4050 X_SIM_URL=http://127.0.0.1:9905 npm run test:
 On Windows, set environment variables using your shell's syntax. The default npm
 commands work without inline environment assignments.
 
+The native skip/bookmark demo check is:
+
+```sh
+node scripts/simulator-bookmarks.mjs
+```
+
+It refuses live mode. It skips unread pages, bookmarks a fixture, verifies
+post-bound confirmation, and checks that the footer stays empty.
+
 ## Optional live validation
 
 Start a local live backend with your authorized session first. Then explicitly opt in:

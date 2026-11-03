@@ -46,6 +46,16 @@ export class Reader {
   }}
   finally {if(this.pending.get(feed)===abort)this.pending.delete(feed);this.notify()}
  }
+ async nextPost(){
+  const s=this.state,feed=this.feed,id=currentPost(s)?.id;
+  if(!id||this.busy)return;
+  if(s.index<s.posts.length-1){s.index++;s.page=0;this.notify();return}
+  if(!s.cursor||this.coolingDown)return;
+  // Fetch older posts directly; skipping never pretends the text was read.
+  await this.fetch(true);
+  if(this.feed===feed&&this.state===s&&currentPost(s)?.id===id&&s.index<s.posts.length-1){s.index++;s.page=0;this.notify()}
+ }
+ previousPost(){const s=this.state;if(s.index>0){s.index--;s.page=0;this.notify()}}
  next(){
   const s=this.state
   if(s.page<this.pages.length-1)s.page++

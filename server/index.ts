@@ -34,8 +34,10 @@ function config(env: NodeJS.ProcessEnv) {
   for (const value of [auth, ct0]) if (value && !/^[A-Za-z0-9_%.-]{1,4096}$/.test(value)) throw new Error('Invalid private credential format');
   if (Boolean(auth) !== Boolean(ct0)) throw new Error('Set both AUTH_TOKEN and CT0 or neither');
   const homeId = env.REED_HOME_QUERY_ID, latestId = env.REED_LATEST_QUERY_ID;
+  const bookmarkId=env.REED_BOOKMARK_QUERY_ID;
+  if(bookmarkId!==undefined&&!/^[A-Za-z0-9_-]{1,100}$/.test(bookmarkId))throw new Error('Invalid bookmark query ID');
   if (Boolean(homeId) !== Boolean(latestId) || [homeId, latestId].some(id => id !== undefined && !/^[A-Za-z0-9_-]{1,100}$/.test(id))) throw new Error('Set both valid Reed query IDs or neither');
-  const queryIds = homeId && latestId ? { HomeTimeline: homeId, HomeLatestTimeline: latestId } : {};
+  const queryIds = {...(homeId&&latestId?{HomeTimeline:homeId,HomeLatestTimeline:latestId}:{}),...(bookmarkId?{CreateBookmark:bookmarkId}:{})};
   const queryFormat=env.REED_QUERY_FORMAT??'relay';
   if(queryFormat!=='legacy'&&queryFormat!=='relay')throw new Error('Invalid REED_QUERY_FORMAT');
   return { mode, host, port, origin, authority: url.host, remote, access, tailnetUser, auth, ct0, queryIds, queryFormat, configured: Boolean(auth && ct0) } as const;
@@ -64,6 +66,7 @@ export function createServer(options: ServerOptions = {}): Server {
   const pairing=cfg.tailnetUser?new PairingStore(env.REED_PAIRING_FILE??resolve(appRoot,'.local/beta-pairing.json'),now):null;
   const photos = new Photos(options.fetcher,createHash('sha256').update('x-photo-v1\0').update(cfg.auth).update('\0').update(cfg.ct0).digest());
   const dist = resolve(options.distDir ?? resolve(appRoot, 'dist'));
+  const readablePosts=new Map<string,number>(),bookmarked=new Set<string>();
   let active = 0;
   const server = httpServer({ maxHeaderSize: 8192, requestTimeout: 20_000, headersTimeout: 10_000 }, async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
@@ -97,7 +100,7 @@ export function createServer(options: ServerOptions = {}): Server {
       if(cfg.tailnetUser&&origin){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Max-Age','600')}
       if(cfg.tailnetUser&&req.method==='OPTIONS'){
         if(!['GET','POST'].includes(String(req.headers['access-control-request-method']))||String(req.headers['access-control-request-headers']??'').split(',').some(h=>h.trim()&&!/^(?:content-type|authorization)$/i.test(h.trim()))||req.headers['transfer-encoding']||Number(req.headers['content-length']??0)!==0)throw new BackendError('invalid_request',400);
-        if(!url.pathname.startsWith('/api/')||req.headers['access-control-request-method']==='POST'&&(url.pathname!=='/api/pair'||url.search))throw new BackendError('invalid_request',400);
+        if(!url.pathname.startsWith('/api/')||req.headers['access-control-request-method']==='POST'&&(!['/api/pair','/api/bookmark'].includes(url.pathname)||url.search))throw new BackendError('invalid_request',400);
         res.writeHead(204);res.end();return;
       }
       if(pairing&&req.method==='POST'&&url.pathname==='/api/pair'&&!url.search){
@@ -109,6 +112,18 @@ export function createServer(options: ServerOptions = {}): Server {
       }
       if(pairing&&url.pathname.startsWith('/api/')&&!await pairing.authorized(req.headers.authorization))throw new BackendError('pairing_required',401);
       if (!cfg.remote && req.headers.authorization !== undefined) throw new BackendError('forbidden', 403);
+      if(req.method==='POST'&&url.pathname==='/api/bookmark'&&!url.search){
+        if(req.headers['content-type']?.split(';')[0]!=='application/json'||req.headers['transfer-encoding']||Number(req.headers['content-length']??0)>128)throw new BackendError('invalid_request',400);
+        const chunks:Buffer[]=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>128)throw new BackendError('invalid_request',400);chunks.push(chunk)}
+        let input:unknown;try{input=JSON.parse(Buffer.concat(chunks).toString('utf8'))}catch{throw new BackendError('invalid_request',400)}
+        if(!input||typeof input!=='object'||Object.keys(input).length!==2||!('id' in input)||typeof input.id!=='string'||!/^\d{1,40}$/.test(input.id)||!('scope' in input)||input.scope!==scope)throw new BackendError('invalid_request',400);
+        if((readablePosts.get(input.id)??0)<=now())throw new BackendError('post_unavailable',409);
+        if(!bookmarked.has(input.id)){
+          if(cfg.mode==='live'){if(!cfg.configured)throw new BackendError('not_configured',503);await transport.bookmark(input.id)}
+          if(bookmarked.size>=256)bookmarked.delete(bookmarked.values().next().value!);bookmarked.add(input.id);
+        }
+        json(200,{saved:true,mode:cfg.mode,scope});return;
+      }
       if (req.method !== 'GET' || req.headers['transfer-encoding'] || Number(req.headers['content-length'] ?? 0) !== 0) throw new BackendError('invalid_request', 400);
       if (active >= 8) throw new BackendError('busy', 503, 1);
       active++; counted = true;
@@ -143,6 +158,7 @@ export function createServer(options: ServerOptions = {}): Server {
         }
         // Demo image is an explicit local sample; live URLs become session-signed handles.
         const posts=result.posts.map(p=>({...p,...(p.images?{images:p.images.map(image=>({...('kind' in image&&image.kind?{kind:image.kind}:{}),alt:image.alt,url:cfg.mode==='demo'?'/demo-earthrise.jpg':photos.register(image.url)}))}:{})}));
+        for(const post of posts){if(readablePosts.size>=256)readablePosts.delete(readablePosts.keys().next().value!);readablePosts.set(post.id,now()+30*60_000)}
         json(200, { posts, cursor, mode: cfg.mode, scope });
       } else {
         if (url.pathname.startsWith('/api/')) throw new BackendError('not_found', 404);

@@ -21,10 +21,13 @@ text and still images to the glasses. X session cookies stay on the backend.
 - **Full post text, reposts and quotes**, paginated using the glasses' measured font metrics.
 - **Still images**, with an overview and overlapping detail pages. Reaction-only attachments open automatically.
 - **Video/GIF posters**, labeled as stills. There is no video playback.
+- **Skip long posts** directly with Next post / Previous post in the glasses menu.
+- **Bookmark on X** saves the original post to your actual account, with a header confirmation.
 - **Pinned reading**: refreshing queues new arrivals without moving the post you are reading.
 - **Private device pairing** over Tailscale, plus a bounded offline reading cache in the Even host.
 
-This app reads feeds. It does not post, like, publish reposts, load comment threads
+This app reads feeds and saves bookmarks only when you choose **Bookmark post**.
+It does not post, like, publish reposts, load comment threads
 or fetch arbitrary linked webpages.
 
 **Status:** public source, self-hosted setup. A personal 0.3.1 beta was reported
@@ -163,13 +166,21 @@ separate from your X session: provider cookies never go to the phone. See
 | --- | --- |
 | Tap / swipe down | Next text page, then next post; load older posts at the end |
 | Swipe up | Previous page or post |
-| Tap then hold | System menu: refresh, switch feed, jump to newest, images |
+| Tap then hold | System menu: refresh, switch feed, images, Next post, Previous post, Bookmark post |
+| Menu → Next post / Previous post | Skip all remaining pages; enter the adjacent post at page 1 |
+| Menu → Bookmark post | Add the current original post to your X bookmarks |
 | Double-tap in an image | Return to the same text page |
 | Double-tap in text | Request the system exit dialog |
 | Last/first boundary in an automatic image view | Return to the caption and descriptions before continuing |
 
 The X mark, feed/status and page counter stay in the header. The footer has no
 app chrome. Written posts stay text-first; image descriptions remain readable text.
+
+Bookmarks use your backend X session. The header shows **Saving to X**, then
+**Saved to X** only after X confirms the write. The demo shows **Demo saved** and
+never contacts X. A failed or uncertain request is not automatically retried;
+check your bookmarks in X if the result is uncertain. Refresh a stale cached post
+before saving it. This app does not remove bookmarks or synchronize their list.
 
 ## How it works
 

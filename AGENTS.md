@@ -8,7 +8,9 @@ pinned SDK0.0.16 / CLI0.2.0. The generated manifest/builds are not source files.
 Keep X credentials backend-only. Never commit .env, .local, generated artifacts,
 paired-device sessions, real feed screenshots, private endpoint configs or .ehpk
 files. Tests use fabricated data; live reads require explicit authorization and
-`X_ALLOW_LIVE=1`. No posting, likes, repost publishing or account mutations.
+`X_ALLOW_LIVE=1`. Only an explicit user action may add the currently read original post to X bookmarks.
+No posting, likes, repost publishing, bookmark deletion or other account mutations.
+Never automatically retry a dispatched bookmark write; uncertain results must say so.
 
 G2 is576x288, with at most8 text/list and4 images. Startup succeeds numerically at0
 and happens once per WebView boot. Exactly one text/list captures events. Give all

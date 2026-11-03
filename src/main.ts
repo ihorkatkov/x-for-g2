@@ -2,15 +2,16 @@ import './sdk-logging.ts'
 import './style.css'
 import {waitForEvenAppBridge,TextContainerProperty,CreateStartUpPageContainer,TextContainerUpgrade,MenuContainerProperty,MenuItemProperty,ImageContainerProperty,ImageRawDataUpdate,DeviceConnectType,type EvenAppBridge} from '@evenrealities/even_hub_sdk'
 import {Diagnostics} from './telemetry.ts'
+import {BookmarkAction} from './bookmark.ts'
 import {Reader} from './reader.ts'
 import {serviceURL,authHeaders,restoreClientAuth,acceptClientAuth,serializedClientAuth} from './service.ts'
 import {feedError} from './api.ts'
 import {parseBatch,restore,snapshot,currentPost,eventAction,postText,validScope,type Action,type Mode} from './model.ts'
 import {Gallery,loadPhoto,blankTile,attachmentOnly,AttachmentSession} from './photo.ts'
 import {markBytes} from './mark.ts'
-import {SerialHost,LatestRender,pageCounter,headerText,display,geometry,menuItems,type Display} from './host.ts'
+import {SerialHost,LatestRender,pageCounter,headerText,bookmarkHeader,display,geometry,menuItems,type Display} from './host.ts'
 
-const diagnostics=new Diagnostics('reed-g2','0.3.1','0.0.16',200)
+const diagnostics=new Diagnostics('reed-g2','0.3.2','0.0.16',200)
 diagnostics.record('session.start')
 const el=<T extends HTMLElement=HTMLElement>(id:string)=>{const node=document.getElementById(id);if(!node)throw Error('Missing UI element');return node as T}
 const queue=new SerialHost()
@@ -29,15 +30,24 @@ const selectedKey=()=>`${reader.feed}:${reader.state.scope}:${currentPost(reader
 const clearImage=blankTile()
 const gallery=new Gallery(loadPhoto,()=>render())
 const attachments=new AttachmentSession(gallery)
+const bookmarks=new BookmarkAction(async(id,scope,expectedMode)=>{
+ let response:Response;
+ try{response=await fetch(serviceURL('/api/bookmark'),{method:'POST',headers:{...authHeaders(),'Content-Type':'application/json'},body:JSON.stringify({id,scope}),signal:AbortSignal.timeout(25000),credentials:'same-origin'})}catch{throw Error('Check X bookmarks')}
+ if(!response.ok){let payload:unknown;try{payload=await jsonResponse(response,2000)}catch{}throw feedError(response.status,payload,response.headers.get('retry-after'))}
+ let result:{saved?:unknown;mode?:unknown;scope?:unknown};try{result=await jsonResponse(response,2000) as typeof result}catch{throw Error('Check X bookmarks')}
+ if(result.saved!==true||result.mode!==expectedMode||result.scope!==scope)throw Error('Check X bookmarks');
+},()=>render())
+function bookmarkStatus(){const p=currentPost(reader.state);return p&&reader.state.scope?bookmarks.status(p.id,reader.state.scope):{saved:false,message:''}}
+function withBookmarkStatus(frame:Display){const status=bookmarkStatus().message;if(status)frame.header=bookmarkHeader(frame.header,status);return frame}
 function view(){
  const frame=display(reader.feed,reader.state,reader.pages,reader.busy,reader.message)
  if(needsPairing&&!currentPost(reader.state)){frame.header='Pair phone';frame.author='Connect X in the phone app'}
- if(!gallery.open)return frame
+ if(!gallery.open)return withBookmarkStatus(frame)
  const post=currentPost(reader.state),kind=gallery.frame?.page.kind??post?.images?.[0]?.kind,imageName=kind==='video-still'?'Video still':kind==='gif-still'?'GIF still':'Image'
  frame.header=headerText(`${imageName}${gallery.frame?.page.photoCount&&gallery.frame.page.photoCount>1?' '+gallery.frame.page.photoNumber+'/'+gallery.frame.page.photoCount:''}${reader.state.mode==='demo'?' / DEMO':''}${gallery.loading?' / Loading':gallery.error?(gallery.pages.length?' / ! Partial':' / ! Unavailable'):''}`,post?.repostedBy?(post.repostedByHandle?'@'+post.repostedByHandle:post.repostedBy):undefined)
  frame.pager=gallery.pages.length?pageCounter(gallery.page+1,gallery.pages.length):'';frame.body=''
  frame.photo=gallery.frame
- return frame
+ return withBookmarkStatus(frame)
 }
 async function imageTiles(tiles:[Uint8Array,Uint8Array]){
  for(let i=0;i<2;i++){
@@ -119,6 +129,12 @@ function renderPhone(){
  el('position').textContent=p?`Post ${s.index+1} / ${s.posts.length} · Page ${Math.min(s.page,pages.length-1)+1} / ${pages.length}`:'No posts yet'
  el<HTMLButtonElement>('previous').disabled=!p||s.index===0&&s.page===0
  el<HTMLButtonElement>('next').disabled=reader.busy||!p||reader.atEnd&&(!s.cursor||reader.coolingDown)
+ el<HTMLButtonElement>('nextPost').disabled=reader.busy||!p||s.index===s.posts.length-1&&(!s.cursor||reader.coolingDown)
+ el<HTMLButtonElement>('previousPost').disabled=!p||s.index===0
+ el<HTMLButtonElement>('bookmark').disabled=!p||!s.scope||needsPairing||bookmarks.busy||bookmarkStatus().saved
+ el('bookmark').textContent=bookmarks.busy?'Saving…':bookmarkStatus().saved?'Bookmarked':s.mode==='demo'?'Bookmark demo post':'Bookmark on X'
+ el('bookmarkStatus').textContent=bookmarkStatus().message
+ el('bookmarkStatus').hidden=!bookmarkStatus().message
  el('more').hidden=!s.cursor||!reader.atEnd;el<HTMLButtonElement>('more').disabled=reader.busy||reader.coolingDown
  el('arrivals').hidden=!s.arrivals;el('arrivals').textContent=`${s.arrivals} new · Jump to newest`
  for(const key of ['header','author','body','pager'] as const)el(`lens${key[0].toUpperCase()+key.slice(1)}`).textContent=frame[key]
@@ -129,8 +145,8 @@ function renderPhone(){
  el('imageStatus').textContent=gallery.open?(gallery.loading?'Preparing image…':gallery.error||`Image page ${gallery.page+1} / ${gallery.pages.length} · Swipe for detail; double-tap returns to text.`):p&&attachmentOnly(p)?'Attachment shown automatically. Video/GIF attachments show a still preview; descriptions remain readable text.':'Still images open separately. Image descriptions are included as readable text.'
  const photo=el<HTMLCanvasElement>('lensPhoto');photo.hidden=!frame.photo
  if(frame.photo){const ctx=photo.getContext('2d')!;const image=ctx.createImageData(536,144);image.data.set(frame.photo.page.pixels);ctx.putImageData(image,0,0)}
- el('previous').textContent=gallery.open&&attachments.automatic&&gallery.page===0?'← Read text':'← Previous'
- el('next').textContent=gallery.open&&attachments.automatic&&gallery.page>=gallery.pages.length-1?'Read text →':'Next →'
+ el('previous').textContent=gallery.open&&attachments.automatic&&gallery.page===0?'← Read text':!gallery.open&&pages.length>1?(s.page>0?'← Previous page':'← Previous post'):'← Previous'
+ el('next').textContent=gallery.open&&attachments.automatic&&gallery.page>=gallery.pages.length-1?'Read text →':!gallery.open&&pages.length>1?(s.page<pages.length-1?'Next page →':'Next post →'):'Next →'
  if(gallery.open){el<HTMLButtonElement>('previous').disabled=gallery.page===0&&!attachments.automatic;el<HTMLButtonElement>('next').disabled=gallery.page>=gallery.pages.length-1&&!attachments.automatic;el('position').textContent=gallery.loading?'Loading image…':`Image page ${gallery.page+1} / ${gallery.pages.length}`}
  el('cacheLabel').textContent=s.updatedAt?`Cached · ${new Date(s.updatedAt).toLocaleTimeString()}`:'No cache'
  el('setupStatus').textContent=`Backend: ${configured?'configured':mode==='demo'?'explicit demo':'not ready'}. Glasses: ${ready?'startup accepted by host':'not connected'}. ${cacheEnabled?'Host reading cache enabled.':'Host reading cache cleared; caching paused for this session.'}`
@@ -139,7 +155,7 @@ function render(){
  if(!alive)return
  if(attachments.synchronize(selectedKey(),currentPost(reader.state),reader.busy))return
  renderPhone()
- const state={hasVideoPreview:!!currentPost(reader.state)?.images?.some(i=>i.kind==='video-still'),autoEligible:!!currentPost(reader.state)&&attachmentOnly(currentPost(reader.state)!),autoImage:attachments.automatic&&gallery.open,videoStill:gallery.frame?.page.kind==='video-still',hasPhotos:!!currentPost(reader.state)?.images?.length,reposted:!!currentPost(reader.state)?.repostedBy,textPages:reader.pages.length,imageOpen:gallery.open,imagePage:gallery.page,imagePages:gallery.pages.length,imageLoading:gallery.loading,feed:reader.feed==='for-you'?0:1,index:reader.state.index,page:reader.state.page,count:reader.state.posts.length,arrivals:reader.state.arrivals,busy:reader.busy,hasCursor:!!reader.state.cursor,demo:reader.state.mode==='demo'}
+ const state={hasVideoPreview:!!currentPost(reader.state)?.images?.some(i=>i.kind==='video-still'),autoEligible:!!currentPost(reader.state)&&attachmentOnly(currentPost(reader.state)!),autoImage:attachments.automatic&&gallery.open,videoStill:gallery.frame?.page.kind==='video-still',hasPhotos:!!currentPost(reader.state)?.images?.length,reposted:!!currentPost(reader.state)?.repostedBy,textPages:reader.pages.length,imageOpen:gallery.open,imagePage:gallery.page,imagePages:gallery.pages.length,imageLoading:gallery.loading,feed:reader.feed==='for-you'?0:1,index:reader.state.index,page:reader.state.page,count:reader.state.posts.length,bookmarkSaved:bookmarkStatus().saved,bookmarkBusy:bookmarks.busy,arrivals:reader.state.arrivals,busy:reader.busy,hasCursor:!!reader.state.cursor,demo:reader.state.mode==='demo'}
  diagnostics.record('screen',state)
  console.info('REED_STATE '+JSON.stringify(state))
  if(ready)renderer.request(view())
@@ -160,12 +176,15 @@ async function persist(){
 }
 function act(action:Action){
  if(!alive)return
- diagnostics.record('input',{action:['next','previous','exit','refresh','for-you','following','newest','more','persist','resume','dispose','image','text'].indexOf(action)})
+ diagnostics.record('input',{action:['next','previous','exit','refresh','for-you','following','newest','more','persist','resume','dispose','image','text','next-post','previous-post','bookmark'].indexOf(action)})
  renderRetried=false
  if(!['persist','resume'].includes(action))interactionRevision++
  if((action==='next'||action==='previous'||action==='exit')&&attachments.input(action))return
- if(gallery.open&&!['image','persist','resume'].includes(action))gallery.close()
+ if(gallery.open&&!['image','bookmark','next-post','previous-post','persist','resume'].includes(action))gallery.close()
  switch(action){
+  case 'next-post':void reader.nextPost();break
+  case 'previous-post':reader.previousPost();break
+  case 'bookmark':{const p=currentPost(reader.state),scope=reader.state.scope,mode=reader.state.mode;if(p&&scope&&mode&&!needsPairing)void bookmarks.save(p.id,scope,mode);break}
   case 'image':{const p=currentPost(reader.state);if(p?.images)attachments.show(selectedKey(),p.images);break}
   case 'text':gallery.close();break
   case 'next':reader.next();break
@@ -180,7 +199,7 @@ function act(action:Action){
   case 'dispose':cleanup();break
  }
 }
-for(const [id,action] of Object.entries({forYou:'for-you',following:'following',refresh:'refresh',previous:'previous',next:'next',more:'more',arrivals:'newest',viewImage:'image',backText:'text'}))el(id).addEventListener('click',()=>act(action as Action))
+for(const [id,action] of Object.entries({forYou:'for-you',following:'following',refresh:'refresh',previous:'previous',next:'next',more:'more',arrivals:'newest',viewImage:'image',backText:'text',nextPost:'next-post',previousPost:'previous-post',bookmark:'bookmark'}))el(id).addEventListener('click',()=>act(action as Action))
 el('pairForm').addEventListener('submit',event=>{event.preventDefault();if(pairBusy)return;pairBusy=true;renderPhone();void(async()=>{
  try{
   const input=el<HTMLInputElement>('pairCode'),response=await fetch(serviceURL('/api/pair'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:input.value.trim()}),signal:AbortSignal.timeout(15000),credentials:'omit'})
@@ -202,7 +221,7 @@ el('clearCache').addEventListener('click',()=>{
 })
 function cleanup(){
  if(!alive)return
- diagnostics.record('session.end');void persist();alive=false;gallery.close();reader.dispose();if(renderRetryTimer)clearTimeout(renderRetryTimer);if(retryTimer)clearTimeout(retryTimer);if(storageTimer)clearTimeout(storageTimer);for(const unsubscribe of unsubscribers)unsubscribe()
+ diagnostics.record('session.end');void persist();alive=false;bookmarks.dispose();gallery.close();reader.dispose();if(renderRetryTimer)clearTimeout(renderRetryTimer);if(retryTimer)clearTimeout(retryTimer);if(storageTimer)clearTimeout(storageTimer);for(const unsubscribe of unsubscribers)unsubscribe()
 }
 window.addEventListener('beforeunload',cleanup)
 window.addEventListener('keydown',event=>{

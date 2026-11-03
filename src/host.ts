@@ -23,6 +23,11 @@ export function pageCounter(page:number,total:number){const text=`${page}/${tota
 export function headerText(base:string,who?:string){
  return who?`${pxTruncate(base,250)} / ${pxTruncate('via '+who,112)}`:pxTruncate(base,390)
 }
+/** Keep the current feed/image identity and its state tokens when adding feedback. */
+export function bookmarkHeader(header:string,status:string){
+ const [identity,...tokens]=header.split(' / ');
+ return pxTruncate([identity,status,...tokens].join(' / '),390);
+}
 export function display(feed:Feed,s:FeedState,pages:string[],busy:boolean,message:string):Display {
  const post=currentPost(s),page=Math.min(s.page,pages.length-1),name=feed==='for-you'?'For You':'Following'
  return {
@@ -38,4 +43,4 @@ export const geometry=[
  {containerID:3,containerName:'body',xPosition:20,yPosition:76,width:536,height:200,isEventCapture:1,textColor:4,zOrderIndex:5},
  {containerID:4,containerName:'pager',xPosition:470,yPosition:8,width:86,height:28,isEventCapture:0,textColor:2,zOrderIndex:6}
 ] as const
-export const menuItems=[{itemID:1,itemName:'Refresh'},{itemID:2,itemName:'Read For You'},{itemID:3,itemName:'Read Following'},{itemID:4,itemName:'Jump to newest'},{itemID:5,itemName:'Load more at end'},{itemID:6,itemName:'View post images'},{itemID:7,itemName:'Back to post text'}]
+export const menuItems=[{itemID:1,itemName:'Refresh'},{itemID:2,itemName:'Read For You'},{itemID:3,itemName:'Read Following'},{itemID:4,itemName:'Jump to newest'},{itemID:5,itemName:'Load more at end'},{itemID:6,itemName:'View post images'},{itemID:7,itemName:'Back to post text'},{itemID:8,itemName:'Next post'},{itemID:9,itemName:'Previous post'},{itemID:10,itemName:'Bookmark post'}]

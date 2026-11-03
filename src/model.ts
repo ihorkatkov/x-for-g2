@@ -116,12 +116,12 @@ export function restore(raw:string,mode:Mode,scope?:string):Saved|null {
     return {version:3,feed:v.feed,feeds:result}
   }catch{return null}
 }
-export type Action = 'next'|'previous'|'exit'|'refresh'|Feed|'newest'|'more'|'persist'|'resume'|'dispose'|'image'|'text'
+export type Action = 'next-post'|'previous-post'|'bookmark'|'next'|'previous'|'exit'|'refresh'|Feed|'newest'|'more'|'persist'|'resume'|'dispose'|'image'|'text'
 export function eventAction(event:{sysEvent?:{eventType?:number};textEvent?:{eventType?:number};menuItemClickEvent?:{itemID?:number};audioEvent?:unknown}):Action|null {
   const sys=event.sysEvent?event.sysEvent.eventType??0:null, txt=event.textEvent?event.textEvent.eventType??0:null
   if(sys===6||sys===7)return 'dispose'
   if(sys===3||txt===3)return 'exit'
-  const menu:Record<number,Action>={1:'refresh',2:'for-you',3:'following',4:'newest',5:'more',6:'image',7:'text'}
+  const menu:Record<number,Action>={1:'refresh',2:'for-you',3:'following',4:'newest',5:'more',6:'image',7:'text',8:'next-post',9:'previous-post',10:'bookmark'}
   if(event.menuItemClickEvent)return menu[event.menuItemClickEvent.itemID??0]??null
   if(txt===1)return 'previous'
   if(txt===2||sys===0||txt===0)return 'next'

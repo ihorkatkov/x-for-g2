@@ -39,7 +39,7 @@ test('repost attribution survives cache/refresh and remains visible beyond the f
  const pages=paginate(postText(currentPost(s)!)),view=display('following',s,pages,false,'');assert.match(view.header,/via @friend/);assert.match(view.author,/Original Author/);assert.equal(view.body,pages[2]);assert.ok(!view.body.includes('RT @'))
  const cached=restore(snapshot('following',{'for-you':freshState(),following:s}),'live',scope)!;assert.equal(currentPost(cached.feeds.following)?.repostedByHandle,'friend')
 })
-test('application remains GET-only: former posting routes are rejected and no mutation capability is exposed',async()=>{
+test('posting and repost-publishing routes remain rejected',async()=>{
  let upstream=0;const server=createServer({env:{REED_MODE:'demo'},fetcher:async()=>{upstream++;throw Error('No network expected')}});await new Promise<void>(r=>server.listen(0,'127.0.0.1',r));const a=server.address();assert.ok(a&&typeof a==='object');
  try{for(const path of ['/api/repost','/api/repost/prepare']){
   const status=await new Promise<number>((resolve,reject)=>{const req=request({hostname:'127.0.0.1',port:a.port,path,method:'POST',headers:{Host:'127.0.0.1:4040','Content-Type':'application/json','Content-Length':'2',Origin:'http://127.0.0.1:4040'}},response=>{response.resume();resolve(response.statusCode!)});req.on('error',reject);req.end('{}')});assert.equal(status,400)

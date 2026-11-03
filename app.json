@@ -2,7 +2,7 @@
   "package_id": "com.ihorkatkov.reedg2",
   "edition": "202601",
   "name": "X",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "min_sdk_version": "0.0.16",
   "entrypoint": "index.html",
   "permissions": [
